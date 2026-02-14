@@ -2,7 +2,11 @@ import mongoose from 'mongoose';
 
 export const connectDB = async () => {
       try {
-            await mongoose.connect(process.env.MONGO_URI!);
+            const mongoUrl = process.env.MONGODB_URL || process.env.MONGO_URI;
+            if (!mongoUrl) {
+                  throw new Error('Missing MongoDB connection string. Set MONGODB_URL in your .env file.');
+            }
+            await mongoose.connect(mongoUrl);
             console.log('MongoDB connected');
       } catch (error) {
             console.error('MongoDB connection failed:', error);
