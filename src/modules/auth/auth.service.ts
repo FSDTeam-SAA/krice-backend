@@ -7,6 +7,53 @@ import { createToken, verifyToken } from '../../utils/tokenGenerate';
 import verificationCodeTemplate from '../../utils/verificationCodeTemplate';
 import { User } from '../user/user.model';
 import sendEmail from '../../utils/sendEmail';
+import { IUser } from '../user/user.interface';
+
+const register = async (payload: IUser) => {
+      const { email } = payload;
+      if (!email) {
+            throw new AppError('Email is required', StatusCodes.BAD_REQUEST);
+      }
+
+      const existingUser = await User.isUserExistByEmail(email);
+      if (existingUser) {
+            throw new AppError('Email already in use', StatusCodes.CONFLICT);
+      }
+
+      const newUser = await User.create(payload);
+
+      const tokenPayload = {
+            id: newUser._id,
+            email: newUser.email,
+            role: newUser.role,
+      };
+
+      const accessToken = createToken(tokenPayload, config.JWT_SECRET as string, config.JWT_EXPIRES_IN as string);
+
+      const refreshToken = createToken(
+            tokenPayload,
+            config.refreshTokenSecret as string,
+            config.jwtRefreshTokenExpiresIn as string
+      );
+
+      return {
+            accessToken,
+            refreshToken,
+            user: {
+                  id: newUser._id,
+                  email: newUser.email,
+                  role: newUser.role,
+                  firstName: newUser.firstName,
+                  lastName: newUser.lastName,
+                  image: newUser.image,
+                  phoneNumber: newUser.phoneNumber,
+                  homeAddress: newUser.homeAddress,
+                  city: newUser.city,
+                  region: newUser.region,
+                  location: newUser.location,
+            },
+      };
+};
 
 const login = async (payload: { email: string; password: string }) => {
       const { email, password } = payload;
@@ -193,8 +240,8 @@ const resetPassword = async (payload: { newPassword: string }, email: string) =>
             { email },
             {
                   password: hashedPassword,
-                  otp: undefined,
-                  otpExpires: undefined,
+                  resetPasswordOtp: null,
+                  resetPasswordOtpExpires: null,
             },
             { new: true }
       ).select('-password -otp -otpExpires -resetPasswordOtp -resetPasswordOtpExpires');
@@ -235,6 +282,7 @@ const changePassword = async (
 };
 
 const authService = {
+      register,
       login,
       refreshToken,
       forgotPassword,
