@@ -1,70 +1,128 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
 import bcrypt from 'bcrypt';
-import { IUser, UserModel } from './user.interface';
+import { model, Schema } from 'mongoose';
+import config from '../../config/config';
+// import { applyEncryption } from '../../middleware/encryptionMiddleware'
+import { IUser, userModel } from './user.interface';
 
-const userSchema: Schema = new Schema<IUser>(
+const userSchema = new Schema<IUser>(
       {
-            name: { type: String, required: true },
-            email: { type: String, required: true, unique: true },
-            password: { type: String, select: 0, required: true },
-            username: { type: String, required: true, unique: true },
-            phone: { type: String },
-            credit: { type: Number, default: null },
+            firstName: {
+                  type: String,
+                  required: true,
+            },
+            lastName: {
+                  type: String,
+                  required: true,
+            },
+            email: {
+                  type: String,
+                  required: true,
+                  unique: true,
+            },
+            phoneNumber: {
+                  type: String,
+            },
+            password: {
+                  type: String,
+                  required: true,
+            },
+            homeAddress: {
+                  type: String,
+            },
+            city: {
+                  type: String,
+            },
+            region: {
+                  type: String,
+            },
+            selectedRole: {
+                  type: Schema.Types.ObjectId,
+                  ref: 'Role',
+                  default: null,
+            },
             role: {
                   type: String,
-                  default: 'user',
-                  enum: ['user', 'admin', 'driver'],
+                  enum: ['owner', 'employer'],
+                  default: 'employer',
+            },
+            image: {
+                  url: { type: String },
+                  publicId: { type: String },
+            },
+            balance: {
+                  type: Number,
+                  default: 0,
+            },
+            companyName: {
+                  type: String,
+            },
+            location: {
+                  type: String,
+            },
+            resetPasswordOtp: {
+                  type: String,
+                  default: null,
+            },
+            resetPasswordOtpExpires: {
+                  type: Date,
+                  default: null,
+            },
+            role_id: {
+                  type: Schema.Types.ObjectId,
+                  ref: 'Role',
+                  default: null,
+            },
+            isVerified: {
+                  type: Boolean,
+                  default: false,
+            },
+            otp: {
+                  type: String,
+                  default: null,
+            },
+            otpExpires: {
+                  type: Date,
+                  default: null,
             },
             avatar: {
-                  public_id: { type: String, default: '' },
-                  url: { type: String, default: '' },
+                  type: String,
             },
-            verificationInfo: {
-                  verified: { type: Boolean, default: false },
-                  token: { type: String, default: '' },
-            },
-            password_reset_token: { type: String, default: '' },
-            fine: { type: Number, default: 0 },
-            refreshToken: { type: String, default: '' },
       },
-      { timestamps: true }
+      {
+            timestamps: true,
+            versionKey: false,
+      }
 );
 
-// Pre save middleware / hook : will work on create() save()
-userSchema.pre('save', async function (next) {
-      const user = this as any;
-
-      // Hash password
-      if (user.isModified('password')) {
-            const saltRounds = Number(process.env.bcrypt_salt_round) || 10;
-            let pass = user.password;
-            user.password = await bcrypt.hash(pass, saltRounds);
-      }
+userSchema.pre('save', async function (this: IUser, next) {
+      this.password = await bcrypt.hash(this.password, Number(config.bcryptSaltRounds));
 
       next();
 });
 
-// //post middleware /hook
-// userSchema.post('save', function (doc, next) {
-//     doc.password = '';
-//     if (doc.verificationInfo) {
-//         doc.verificationInfo.OTP = '';
-//     }
-//     doc.secureFolderPin = '';
-//     next();
-// });
+userSchema.post('save', function (doc: IUser, next) {
+      doc.password = '';
+      next();
+});
 
-userSchema.statics.isUserExistsByEmail = async function (email: string) {
-      return await User.findOne({ email }).select('+password +secureFolderPin');
+userSchema.statics.isPasswordMatch = async function (password: string, hashedPassword: string) {
+      return await bcrypt.compare(password, hashedPassword);
 };
 
-userSchema.statics.isOTPVerified = async function (id: string) {
-      const user = await User.findById(id).select('+verificationInfo');
-      return user?.verificationInfo.verified;
+userSchema.statics.isUserExistByEmail = async function (email: string): Promise<IUser | null> {
+      return await User.findOne({ email });
 };
 
-userSchema.statics.isPasswordMatched = async function (plainTextPassword: string, hashPassword: string) {
-      return await bcrypt.compare(plainTextPassword, hashPassword);
+userSchema.statics.isUserExistById = async function (_id: string): Promise<IUser | null> {
+      return await User.findOne({ _id });
 };
 
-export const User = mongoose.model<IUser, UserModel>('User', userSchema);
+// applyEncryption(userSchema, [
+//   'phoneNumber',
+//   'homeAddress',
+//   'city',
+//   'region',
+//   'location',
+// ])
+
+export const User = model<IUser, userModel>('User', userSchema);

@@ -1,33 +1,40 @@
-import { Document, Model } from 'mongoose';
+import { Model, Types } from 'mongoose'
+import { USER_ROLE } from './user.constant'
 
-export interface IUser extends Document {
-      _id: string;
-      name: string;
-      email: string;
-      password?: string;
-      username: string;
-      credit: number;
-      role: 'admin' | 'user' | 'driver';
-      verificationInfo: {
-            verified: boolean;
-            token: string;
-      };
-      phone: string;
-      avatar?: {
-            public_id: string;
-            url: string;
-      };
-      password_reset_token: string;
-      fine: number;
-      refreshToken: string;
+export interface IUser {
+  _id?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber?: string;
+  password: string;
+  homeAddress?: string;
+  city?: string;
+  region?: string;
+  role: "owner" | "employer";
+  image?: {
+    url?: string;
+    publicId?: string;
+  };
+  balance: number;
+  selectedRole?: Types.ObjectId;
+  companyName?: string;
+  location?: string;
+  role_id?: Types.ObjectId;
+  resetPasswordOtp?: string | null;
+  resetPasswordOtpExpires?: Date | null;
+  isVerified?: boolean;
+  otp?: string | null;
+  otpExpires?: Date | null;
+  avatar?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
-export type TLoginUser = {
-      email: string;
-      password: string;
-};
-export interface UserModel extends Model<IUser> {
-      isUserExistsByEmail(email: string): Promise<IUser>;
-      isOTPVerified(id: string): Promise<boolean>;
-      isPasswordMatched(plainTextPassword: string, hashPassword: string): Promise<boolean>;
-      isJWTIssuedBeforePasswordChanged(passwordChangeTimeStamp: Date, JwtIssuedTimeStamp: number): boolean;
+
+export interface userModel extends Model<IUser> {
+  isPasswordMatch(password: string, hashedPassword: string): Promise<boolean>
+  isUserExistByEmail(email: string): Promise<IUser | null>
+  isUserExistById(_id: string): Promise<IUser | null>
 }
+
+export type TUserRole = keyof typeof USER_ROLE
