@@ -23,6 +23,5 @@ export const upload = multer({
                   return cb(null, true);
             }
             cb(new Error('Only images (jpeg, jpg, png, row), pdf are allowed'));
-            cb(new Error('Only images (jpeg, jpg, png) are allowed'));
       },
 });

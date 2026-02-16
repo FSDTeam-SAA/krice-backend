@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Quotation } from './quotation.model';
 import catchAsync from '../../utils/catchAsync';
 import { uploadToCloudinary } from '../../utils/cloudinary';
+import { getPaginationParams, buildMetaPagination } from '../../utils/pagination';
 
 // Create a new quotation
 export const createQuotation = catchAsync(async (req: Request, res: Response) => {
@@ -26,9 +27,21 @@ export const createQuotation = catchAsync(async (req: Request, res: Response) =>
 });
 
 // Get all quotations
-export const getAllQuotations = catchAsync(async (_req: Request, res: Response) => {
-      const quotations = await Quotation.find();
-      res.status(200).json({ success: true, data: quotations });
+export const getAllQuotations = catchAsync(async (req: Request, res: Response) => {
+      const { page, limit, skip } = getPaginationParams(req.query);
+
+      const [quotations, total] = await Promise.all([
+            Quotation.find().skip(skip).limit(limit),
+            Quotation.countDocuments(),
+      ]);
+
+      const meta = buildMetaPagination(total, page, limit);
+
+      res.status(200).json({
+            success: true,
+            data: quotations,
+            meta,
+      });
 });
 
 // Get a single quotation by ID
