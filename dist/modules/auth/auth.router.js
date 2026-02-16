@@ -1,0 +1,23 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_controller_1 = __importDefault(require("./auth.controller"));
+const auth_validation_1 = require("./auth.validation");
+const user_constant_1 = require("../user/user.constant");
+const validateRequest_1 = __importDefault(require("../../middlewares/validateRequest"));
+const security_1 = require("../../middlewares/security");
+const auth_1 = __importDefault(require("../../middlewares/auth"));
+const router = (0, express_1.Router)();
+router.post('/login', security_1.loginLimiter, (0, validateRequest_1.default)(auth_validation_1.authValidationSchema.authValidation), auth_controller_1.default.login);
+router.post('/register', (0, validateRequest_1.default)(auth_validation_1.authValidationSchema.registerValidation), auth_controller_1.default.register);
+router.post('/refresh-token', auth_controller_1.default.refreshToken);
+router.post('/forgot-password', auth_controller_1.default.forgotPassword);
+router.post('/resend-forgot-otp', (0, auth_1.default)(user_constant_1.USER_ROLE.OWNER, user_constant_1.USER_ROLE.EMPLOYER), auth_controller_1.default.resendForgotOtpCode);
+router.post('/verify-otp', (0, auth_1.default)(user_constant_1.USER_ROLE.OWNER, user_constant_1.USER_ROLE.EMPLOYER), auth_controller_1.default.verifyOtp);
+router.post('/reset-password', (0, auth_1.default)(user_constant_1.USER_ROLE.OWNER, user_constant_1.USER_ROLE.EMPLOYER), auth_controller_1.default.resetPassword);
+router.post('/change-password', (0, auth_1.default)(user_constant_1.USER_ROLE.OWNER, user_constant_1.USER_ROLE.EMPLOYER), auth_controller_1.default.changePassword);
+const authRouter = router;
+exports.default = authRouter;
