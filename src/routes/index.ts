@@ -6,6 +6,7 @@ import authRouter from '../modules/auth/auth.router';
 import pastProjectRoutes from '../modules/pastProject/pastProject.routes';
 import serviceRoutes from '../modules/services/service.routes';
 import memberRoutes from '../modules/members/member.routes';
+import quotationRoutes from '../modules/quotation/quotation.routes';
 
 const router = Router();
 
@@ -33,6 +34,10 @@ const moduleRoutes = [
       {
             path: '/contact-us',
             route: contactUsRoutes,
+      },
+      {
+            path: '/quotations',
+            route: quotationRoutes,
       },
 ];
 
