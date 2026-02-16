@@ -15,13 +15,13 @@ router.post('/register', validateRequest(authValidationSchema.registerValidation
 router.post('/refresh-token', authController.refreshToken);
 router.post('/forgot-password', authController.forgotPassword);
 
-router.post('/resend-forgot-otp', auth(USER_ROLE.OWNER, USER_ROLE.EMPLOYER), authController.resendForgotOtpCode);
+router.post('/resend-forgot-otp', auth(USER_ROLE.USER, USER_ROLE.ADMIN), authController.resendForgotOtpCode);
 
-router.post('/verify-otp', auth(USER_ROLE.OWNER, USER_ROLE.EMPLOYER), authController.verifyOtp);
+router.post('/verify-otp', auth(USER_ROLE.USER, USER_ROLE.ADMIN), authController.verifyOtp);
 
-router.post('/reset-password', auth(USER_ROLE.OWNER, USER_ROLE.EMPLOYER), authController.resetPassword);
+router.post('/reset-password', auth(USER_ROLE.USER, USER_ROLE.ADMIN), authController.resetPassword);
 
-router.post('/change-password', auth(USER_ROLE.OWNER, USER_ROLE.EMPLOYER), authController.changePassword);
+router.post('/change-password', auth(USER_ROLE.USER, USER_ROLE.ADMIN), authController.changePassword);
 
 const authRouter = router;
 export default authRouter;
