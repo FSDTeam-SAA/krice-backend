@@ -11,7 +11,7 @@ export interface IUser {
   homeAddress?: string;
   city?: string;
   region?: string;
-  role: "owner" | "employer";
+  role: "user" | "admin";
   image?: {
     url?: string;
     publicId?: string;

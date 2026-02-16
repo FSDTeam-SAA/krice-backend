@@ -42,8 +42,8 @@ const userSchema = new Schema<IUser>(
             },
             role: {
                   type: String,
-                  enum: ['owner', 'employer'],
-                  default: 'employer',
+                  enum: ['user', 'admin'],
+                  default: 'user',
             },
             image: {
                   url: { type: String },
