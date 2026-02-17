@@ -7,6 +7,7 @@ import pastProjectRoutes from '../modules/pastProject/pastProject.routes';
 import serviceRoutes from '../modules/services/service.routes';
 import memberRoutes from '../modules/members/member.routes';
 import quotationRoutes from '../modules/quotation/quotation.routes';
+import dashboardRoutes from '../modules/dashboard/dashboard.routes';
 
 const router = Router();
 
@@ -38,6 +39,10 @@ const moduleRoutes = [
       {
             path: '/quotations',
             route: quotationRoutes,
+      },
+      {
+            path: '/dashboard',
+            route: dashboardRoutes,
       },
 ];
 
