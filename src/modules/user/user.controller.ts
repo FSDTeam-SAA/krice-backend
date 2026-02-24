@@ -7,6 +7,16 @@ export const getUsers = catchAsync(async (_req: Request, res: Response) => {
       res.status(200).json({ success: true, data: users });
 });
 
+export const getSingleUser = catchAsync(async (req: Request, res: Response) => {
+      const user = await User.findById(req.params.id).select('-password');
+
+      if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      res.status(200).json({ success: true, data: user });
+});
+
 export const updateUser = catchAsync(async (req: Request, res: Response) => {
       const allowedFields = [
             'firstName',
