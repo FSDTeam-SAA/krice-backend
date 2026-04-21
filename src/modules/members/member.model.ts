@@ -5,6 +5,7 @@ export interface IMember {
   role: string;
   description: string;
   image: string;
+  email?: string;
 }
 
 const memberSchema = new Schema<IMember>({
@@ -12,6 +13,7 @@ const memberSchema = new Schema<IMember>({
   role: { type: String, required: true },
   description: { type: String, required: true },
   image: { type: String, required: true },
+  email: { type: String },
 }, {
   timestamps: true,
 });

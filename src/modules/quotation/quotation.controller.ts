@@ -3,6 +3,10 @@ import { Quotation } from './quotation.model';
 import catchAsync from '../../utils/catchAsync';
 import { uploadToCloudinary } from '../../utils/cloudinary';
 import { getPaginationParams, buildMetaPagination } from '../../utils/pagination';
+import sendEmail from '../../utils/sendEmail';
+
+const QUOTATION_EMAIL = 'info@klondikeconstruction307.com';
+// const QUOTATION_EMAIL = 'rashedulhaque.bdcalling@gmail.com';
 
 // Create a new quotation
 export const createQuotation = catchAsync(async (req: Request, res: Response) => {
@@ -23,6 +27,33 @@ export const createQuotation = catchAsync(async (req: Request, res: Response) =>
             ...req.body,
             planFiles: planFiles.length > 0 ? planFiles : [],
       });
+
+      // Send email to the hard-coded address
+      const emailHtml = `
+            <h2>New Quotation Request</h2>
+            <p><strong>Name:</strong> ${quotation.firstName} ${quotation.lastName || ''}</p>
+            <p><strong>Email:</strong> ${quotation.email || 'N/A'}</p>
+            <p><strong>Phone:</strong> ${quotation.phoneNumber}</p>
+            <p><strong>Address:</strong> ${quotation.streetAddress || ''} ${quotation.streetAddressLine2 || ''}, ${quotation.city}, ${quotation.stateOrProvince} ${quotation.postalOrZipCode}</p>
+            <p><strong>Work Type:</strong> ${quotation.workType || 'N/A'}</p>
+            <p><strong>Budget:</strong> ${quotation.budget || 'N/A'}</p>
+            <p><strong>Desired Start Time:</strong> ${quotation.desiredStartTime || 'N/A'}</p>
+            <p><strong>Special Requirements:</strong> ${quotation.specialRequirements || 'N/A'}</p>
+            ${quotation.planFiles && quotation.planFiles.length > 0 ? `<p><strong>Plan Files:</strong> ${quotation.planFiles.join(', ')}</p>` : ''}
+      `;
+
+      const emailResult = await sendEmail({
+            to: QUOTATION_EMAIL,
+            subject: 'New Quotation Request',
+            html: emailHtml,
+      });
+
+      if (emailResult.success) {
+            console.log(`Email sent successfully to ${QUOTATION_EMAIL}`);
+      } else {
+            console.log(`Failed to send email to ${QUOTATION_EMAIL}: ${emailResult.error}`);
+      }
+
       res.status(201).json({ success: true, data: quotation });
 });
 
